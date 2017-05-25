@@ -1,17 +1,26 @@
 import functools
 import scrapy
 import scrapy.http
+import base64
+import gzip
 
 
 def response_data(response):
     "Returns response data that is expected to be useful for vectorisation.. this means everything, more or less."
-    # TODO: meta['capture_features_meta'], if present
-    # TODO: Referer
-    # TODO: URL
-    # TODO: Compressed page content
-    # TODO: Headers
-    # TODO: Request Headers
+    data = {
+        'url': response.url,
+        'body': base64.b64encode(gzip.compress(response.text.encode())).decode(),
+        'headers' = { k.decode(): [s.decode() for s in response.headers.getlist(k)]
+                        for k in response.headers.keys() },
+        'request_headers' = { k.decode(): [s.decode() for s in response.request.headers.getlist(k)]
+                                for k in response.headers.keys() },
+    }
+    if 'Referer' in data['headers'] and len(data['headers']['Referer'])>0:
+        data['referer'] = data['headers']['Referer'][0]
+    if 'capture_features_meta' in response.meta:
+        data.update(response.meta['capture_features_meta'])
     # TODO: Compressed request content?0
+    return data
 
 
 def capture_features(scrapy_parsing_method, *, data_field='response_data'):

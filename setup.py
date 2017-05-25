@@ -44,6 +44,34 @@ setup(name='req2vec',
         For the special case of URLs, two transformers are presented that vectorise
         URL content either as bag-of-words (excluding the primary domain name,
         to prevent overfitting to training domains), or as character trigrams.
+
+        The 'featurisers' submodule includes a bunch of data-collection utilities
+        for scrapy spiders, which are intended (but untested) to act as rapidly-
+        insertable decorators on existing data-collection methods in existing
+        spiders. In other words, the goal is that you can take the `parse(self, response)`
+        method of an existing spider, and decorate it with `req2vec.featurisers.capture_features`,
+        and get the following:
+
+        * Outgoing Requests will have some extra magic (currently minimal) to collect extra context.
+        * Outgoing Items will have an additional field added (default 'response_data')
+          containing potentially valuable data for HTML-response feature-engineering.
+          There is no need to add this field to your Scrapy items, as items are cast
+          first to regular dictionaries.
+
+        # Warnings
+
+        ### Development Status
+        This is all experimental. I'm literally committing this prior to local testing.
+        I'll increment version numbers as I develop and test this.
+
+        ### Spider Decorators for Data Collection
+        Collecting all this extra data in your item pipelines is obviously going
+        to bloat the hell out of your output data. **This is especially true when
+        you yield more than one item per page!**
+
+        ### Pipelines, Transformers Etc.
+        These should be somewhat sane and stable; they are performing trivial
+        tasks and probably work as intended.
       """).strip(),
       author="Cathal Garvey",
       author_email="cathalgarvey@cathalgarvey.me",
